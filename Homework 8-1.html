@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>D3.js Bar Chart with Hover and Tooltip</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+      .tooltip {
+        position: absolute;
+        padding: 9px;
+        background-color: #fff;
+        border: 2px solid #ccc;
+        border-radius: 6px;
+        pointer-events: none;
+        font-size: 15px;
+      }
+      .axis-label {
+        font-size: 15px;
+        font-weight: initial;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart"></div>
+    <script>
+      const data = [
+        { year: "1990", value: 125 },
+        { year: "1991", value: 225 },
+        { year: "1992", value: 290 },
+        { year: "1993", value: 670 },
+        { year: "1994", value: 375 },
+        { year: "1995", value: 485 },
+        { year: "1996", value: 679 },
+        { year: "1997", value: 942 },
+        { year: "1998", value: 847 },
+        { year: "1999", value: 799 },
+      ];
+      const margin = { top: 30, right: 30, bottom: 70, left: 70 };
+      const width = 700 - margin.left - margin.right;
+      const height = 500 - margin.top - margin.bottom;
+      const svg = d3
+        .select("#chart")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin.left}, ${margin.top})`);
+      const x = d3
+        .scaleBand()
+        .range([0, width])
+        .padding(0.2)
+        .domain(data.map((d) => d.year));
+      const y = d3.scaleLinear().range([height, 0]).domain([0, d3.max(data, (d) => d.value)])
+      svg
+        .selectAll("rect")
+        .data(data)
+        .enter()
+        .append("rect")
+        .attr("x", (d) => x(d.year))
+        .attr("y", (d) => y(d.value))
+        .attr("width", x.bandwidth())
+        .attr("height", (d) => height - y(d.value))
+        .attr("fill", "navy")
+        .on("mouseover", function (event, d) {
+          tooltip
+            .style("opacity", 1)
+            .html(`Year: ${d.year}<br>Value: ${d.value}`)
+            .style("left", event.pageX + 10 + "px")
+            .style("top", event.pageY + 10 + "px");
+		  d3.select(this).attr("fill", "red");
+    })
+      .on("mouseout", function () {
+      tooltip.style("opacity", 0);
+      d3.select(this).attr("fill", "navy");
+    });
+  svg
+    .append("g")
+    .attr("transform", `translate(0, ${height})`)
+    .call(d3.axisBottom(x));
+  svg.append("g").call(d3.axisLeft(y));
+  const tooltip = d3
+    .select("body")
+    .append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+  svg
+    .append("text")
+    .attr("class", "axis-label")
+    .attr("transform", `translate(${width / 2}, ${height + margin.top + 30})`)
+    .style("text-anchor", "middle")
+    .text("Year");
+  svg
+    .append("text")
+    .attr("class", "axis-label")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 0 - margin.left)
+    .attr("x", 0 - height / 2)
+    .attr("dy", "1em")
+    .style("text-anchor", "middle")
+    .text("Value");
+</script>
+  </body>
+</html>
